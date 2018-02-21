@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:order-system.xml"/>
+    </spring:beans>
+    <munit:test name="ProcessOrder_returnsMapWithTwoElements_True" description="Calling ProcessOrders flow will return payload of type Java Map that contains two elements in it">
+        <munit:set payload="#[[{'orderID':444, 'location':'international','price':14.01}, {'orderID':444, 'location':'international','price':14.01}, {'orderID':555, 'location':'domestic','price':14.01}]]" doc:name="Set Message: Payload contains international &amp; domestic orders"/>
+        <flow-ref name="order-systemFlow" doc:name="Call_ProcessOrders"/>
+        <munit:assert-true message="FAILED:  Expected payload's type to be Java Map, but found #[payload.getClass().getName()] instead!!" condition="#[payload is java.util.Map]" doc:name="Assert True"/>
+        <munit:assert-on-equals expectedValue="#[2]" actualValue="#[payload.size()]" doc:name="Assert Equals: Validate "/>
+    </munit:test>
+    <munit:test name="ProcessOrder-test-suite-order-systemFlowTest" description="Test">
+        <munit:set payload="#[[{'orderID':444, 'location':'international','price':14.01}, {'orderID':444, 'location':'international','price':14.01}, {'orderID':555, 'location':'domestic','price':14.01}]]" doc:name="Set Message: Payload contains international &amp; domestic orders"/>
+        <flow-ref name="order-systemFlow" doc:name="Flow-ref to order-systemFlow"/>
+        <munit:assert-true message="FAILED: Expected international key to contain some orders, but found NONE!!" condition="#[payload.'international'.size() &gt; 0]" doc:name="Assert True: International key has some orders"/>
+    </munit:test>
+</mule>
